@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Substance Awareness | पदार्थ जागरूकता</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Noto+Sans+Devanagari:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #2a3650;
+    --accent: #60a5fa;
+    --accent2: #34d399;
+    --accent3: #f472b6;
+    --accent-hi: #fb923c;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --bot-bubble: #1a2236;
+    --user-bubble: #1e3a5f;
+    --radius: 20px;
+    --radius-sm: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(96,165,250,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 90%, rgba(251,146,60,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 480px;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #60a5fa 0%, #34d399 50%, #fb923c 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px var(--surface2), 0 0 0 3px rgba(96,165,250,0.5);
+  }
+
+  .header-info { flex: 1; }
+
+  .header-info h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .header-info h1 span { color: var(--accent-hi); }
+
+  .header-info p {
+    font-size: 11px;
+    color: var(--accent2);
+    display: flex; align-items: center; gap: 5px;
+    margin-top: 2px;
+  }
+
+  .header-info p::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent2);
+    animation: pulse 2s infinite;
+  }
+
+  .lang-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .lang-badge:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* MESSAGES */
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+
+  .messages::-webkit-scrollbar { width: 3px; }
+  .messages::-webkit-scrollbar-track { background: transparent; }
+  .messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    animation: fadeUp 0.3s ease forwards;
+    opacity: 0;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.bot { align-items: flex-start; }
+  .msg.user { align-items: flex-end; }
+
+  .bubble {
+    max-width: 88%;
+    padding: 12px 15px;
+    border-radius: var(--radius);
+    line-height: 1.65;
+    font-size: 13.5px;
+  }
+
+  .msg.bot .bubble {
+    background: var(--bot-bubble);
+    border: 1px solid var(--border);
+    border-top-left-radius: 4px;
+  }
+
+  .msg.user .bubble {
+    background: var(--user-bubble);
+    border: 1px solid #1d4a7a;
+    border-top-right-radius: 4px;
+  }
+
+  .bubble .emoji-lead { font-size: 22px; display: block; margin-bottom: 8px; }
+
+  .bubble strong {
+    color: var(--accent);
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+  }
+
+  .bubble.hindi, .bubble.hindi li, .bubble.hindi p {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+
+  .bubble.hindi strong {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 13px;
+  }
+
+  .bubble ul { padding-left: 16px; margin-top: 6px; }
+  .bubble ul li { margin-bottom: 5px; color: #94a3b8; font-size: 13px; }
+  .bubble .back-hint { margin-top: 10px; font-size: 12px; color: var(--text-muted); font-style: italic; }
+
+  /* LANGUAGE SELECTOR */
+  .lang-select {
+    display: flex;
+    gap: 10px;
+    animation: fadeUp 0.4s ease 0.15s forwards;
+    opacity: 0;
+  }
+
+  .lang-btn {
+    flex: 1;
+    padding: 16px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.25s;
+    text-align: center;
+  }
+
+  .lang-btn .lang-flag { font-size: 28px; display: block; margin-bottom: 6px; }
+  .lang-btn .lang-name { font-family: 'Sora', sans-serif; font-weight: 600; font-size: 14px; display: block; }
+  .lang-btn .lang-sub { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .lang-btn.en:hover, .lang-btn.en.active {
+    border-color: var(--accent);
+    background: rgba(96,165,250,0.08);
+    box-shadow: 0 0 20px rgba(96,165,250,0.1);
+  }
+
+  .lang-btn.hi:hover, .lang-btn.hi.active {
+    border-color: var(--accent-hi);
+    background: rgba(251,146,60,0.08);
+    box-shadow: 0 0 20px rgba(251,146,60,0.1);
+    font-family: 'Noto Sans Devanagari', sans-serif;
+  }
+
+  .lang-btn.hi .lang-sub {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+  }
+
+  /* OPTIONS */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    max-width: 90%;
+    animation: fadeUp 0.4s ease 0.1s forwards;
+    opacity: 0;
+  }
+
+  .options.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+    max-width: 100%;
+  }
+
+  .opt-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    text-align: left;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.3;
+  }
+
+  .opt-btn.hindi-btn {
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .opt-btn:hover {
+    background: #1e2d45;
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(96,165,250,0.1);
+  }
+
+  .opt-btn.hindi-btn:hover { color: var(--accent-hi); border-color: var(--accent-hi); }
+
+  .opt-icon { font-size: 16px; flex-shrink: 0; }
+  .opt-label { font-weight: 500; display: block; }
+  .opt-sub { font-size: 11px; color: var(--text-muted); display: block; margin-top: 1px; }
+
+  /* INPUT */
+  .input-bar {
+    border-top: 1px solid var(--border);
+    padding: 10px 12px;
+    display: flex;
+    gap: 8px;
+    background: var(--surface2);
+    flex-shrink: 0;
+  }
+
+  .input-bar input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 9px 15px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .input-bar input:focus { border-color: var(--accent); }
+  .input-bar input::placeholder { color: var(--text-muted); font-size: 12px; }
+
+  .send-btn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.15s, opacity 0.2s;
+    flex-shrink: 0;
+  }
+
+  .send-btn:hover { transform: scale(1.08); opacity: 0.9; }
+  .send-btn svg { width: 17px; height: 17px; fill: #0a0f1e; }
+
+  .disclaimer {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 5px 12px 8px;
+    background: var(--surface2);
+    flex-shrink: 0;
+  }
+
+  .typing {
+    display: flex; gap: 4px; align-items: center; padding: 2px 0;
+  }
+  .typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--text-muted);
+    animation: bounce 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-5px); opacity: 1; }
+  }
+
+  @media (max-width: 480px) {
+    .app { border: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="avatar">🧠</div>
+    <div class="header-info">
+      <h1>Substance Awareness <span>| पदार्थ जागरूकता</span></h1>
+      <p>Online — Ready to Help</p>
+    </div>
+    <div class="lang-badge" onclick="resetToLanguage()" title="Change Language">🌐 Lang</div>
+  </div>
+
+  <div class="messages" id="messages"></div>
+
+  <div class="input-bar">
+    <input type="text" id="userInput" placeholder="Type or choose an option above…" autocomplete="off"/>
+    <button class="send-btn" onclick="handleUserText()">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+    </button>
+  </div>
+  <div class="disclaimer" id="disclaimer">⚕️ For educational purposes only. Always consult a healthcare professional. | केवल शैक्षणिक उद्देश्य के लिए।</div>
+</div>
+
+<script>
+const ms = document.getElementById('messages');
+const inputEl = document.getElementById('userInput');
+let lang = null; // 'en' or 'hi'
+
+// ═══════════════════════════════════════════════════════════
+// ENGLISH CONTENT
+// ═══════════════════════════════════════════════════════════
+const enContent = {
+  alcohol: {
+    icon: '🍺', title: 'Alcohol — Knowledge & Awareness',
+    body: `<strong>What is Alcohol Dependence?</strong><ul><li>A chronic condition where body & mind become reliant on alcohol</li><li>Characterized by craving, loss of control, and withdrawal on stopping</li><li>Also called Alcohol Use Disorder (AUD)</li></ul><strong>Signs & Symptoms</strong><ul><li>Strong urge to drink (craving)</li><li>Unable to stop once started</li><li>Tolerance — needing more alcohol for same effect</li><li>Withdrawal: tremors, sweating, anxiety, seizures</li></ul><strong>Health Effects</strong><ul><li>Liver: Fatty liver → Hepatitis → Cirrhosis</li><li>Brain: Wernicke-Korsakoff syndrome, cognitive decline</li><li>Heart: Cardiomyopathy, arrhythmias</li></ul><strong>When to Seek Help</strong><ul><li>If you cannot stop despite wanting to</li><li>If withdrawal symptoms appear when not drinking</li></ul>`
+  },
+  opioid: {
+    icon: '💊', title: 'Opioids — Knowledge & Awareness',
+    body: `<strong>What are Opioids?</strong><ul><li>Drugs acting on opioid receptors — natural, semi-synthetic, synthetic</li><li>Examples: Morphine, Heroin, Tramadol, Fentanyl</li></ul><strong>Signs of Opioid Use Disorder</strong><ul><li>Pinpoint pupils, drowsiness, slowed breathing</li><li>Track marks on arms (if injecting)</li><li>Withdrawal: muscle aches, goosebumps, vomiting, anxiety</li></ul><strong>Overdose Warning Signs 🚨</strong><ul><li>Unconscious, slow/stopped breathing, blue lips</li><li>Gurgling or choking sounds</li></ul><strong>Naloxone</strong><ul><li>Reverses opioid overdose within minutes</li><li>Always call emergency services first</li></ul>`
+  },
+  cannabis: {
+    icon: '🌿', title: 'Cannabis — Knowledge & Awareness',
+    body: `<strong>What is Cannabis?</strong><ul><li>Derived from Cannabis sativa plant; active compound is THC</li><li>Used as marijuana, hashish, or oils</li></ul><strong>Signs of Cannabis Use Disorder</strong><ul><li>Red eyes, increased appetite, slowed reaction time</li><li>Withdrawal: irritability, insomnia, decreased appetite</li><li>Amotivational syndrome with heavy use</li></ul><strong>Health Effects</strong><ul><li>Lung damage with chronic smoking</li><li>Can trigger psychosis, especially in adolescents</li><li>Impaired brain development in young users</li></ul>`
+  },
+  nicotine: {
+    icon: '🚬', title: 'Nicotine — Knowledge & Awareness',
+    body: `<strong>What is Nicotine?</strong><ul><li>Highly addictive stimulant in tobacco and e-cigarettes</li><li>One of the leading preventable causes of death globally</li></ul><strong>Signs of Dependence</strong><ul><li>Smoking first thing in the morning</li><li>Irritability, anxiety when unable to smoke</li><li>Continuing despite knowing health harms</li></ul><strong>Health Effects</strong><ul><li>Lungs: COPD, lung cancer, chronic bronchitis</li><li>Heart: Coronary artery disease, stroke</li><li>Oral cancers, pregnancy complications</li></ul>`
+  },
+  cocaine: {
+    icon: '🤍', title: 'Cocaine — Knowledge & Awareness',
+    body: `<strong>What is Cocaine?</strong><ul><li>Powerful stimulant from coca plant — snorted, injected, or smoked (crack)</li><li>Causes intense but short-lived euphoria — leads to binge use</li></ul><strong>Signs of Use</strong><ul><li>Dilated pupils, elevated heart rate, restlessness</li><li>Nosebleeds, septum damage (snorting)</li><li>Crash after use: fatigue, depression, craving</li></ul><strong>Health Risks</strong><ul><li>Heart attack (even in young people), stroke, seizures</li><li>Cocaine-induced psychosis, paranoia</li></ul>`
+  },
+  amphetamine: {
+    icon: '⚡', title: 'Amphetamines — Knowledge & Awareness',
+    body: `<strong>What are Amphetamines?</strong><ul><li>Synthetic stimulants: Amphetamine, Methamphetamine (Meth/Crystal)</li><li>Misused for euphoria, energy, or weight loss</li></ul><strong>Signs of Use</strong><ul><li>Rapid weight loss, dental decay ("meth mouth")</li><li>Paranoia, aggression, skin picking</li><li>Crash: severe depression, fatigue, hypersomnia</li></ul><strong>Health Risks</strong><ul><li>Hypertension, arrhythmia, heart attack</li><li>Psychosis resembling schizophrenia</li><li>Dopamine system damage with chronic use</li></ul>`
+  },
+  mdma: {
+    icon: '💙', title: 'MDMA — Knowledge & Awareness',
+    body: `<strong>What is MDMA?</strong><ul><li>Ecstasy / Molly — stimulant and empathogen</li><li>Causes euphoria, emotional closeness, energy</li><li>Commonly used at parties/raves</li></ul><strong>Signs of Use</strong><ul><li>Dilated pupils, jaw clenching, sweating, elevated heart rate</li><li>Comedown: depression, fatigue, memory impairment</li></ul><strong>Health Risks</strong><ul><li>Hyperthermia — dangerous overheating (can be fatal)</li><li>Hyponatremia from excess water intake</li><li>Serotonin syndrome if mixed with antidepressants</li></ul>`
+  },
+  lsd: {
+    icon: '🌀', title: 'LSD — Knowledge & Awareness',
+    body: `<strong>What is LSD?</strong><ul><li>Lysergic acid diethylamide — powerful hallucinogen</li><li>Effects last 8–12 hours; taken as tabs or liquid</li></ul><strong>Signs of Use</strong><ul><li>Visual/auditory hallucinations, dilated pupils</li><li>Distorted sense of time and identity</li><li>Extreme mood swings during a "trip"</li></ul><strong>Health Risks</strong><ul><li>Bad trips: extreme panic, paranoia</li><li>Can trigger psychotic disorders</li><li>HPPD — flashbacks that persist after use</li></ul>`
+  },
+  caffeine: {
+    icon: '☕', title: 'Caffeine — Knowledge & Awareness',
+    body: `<strong>What is Caffeine?</strong><ul><li>World's most widely used psychoactive substance</li><li>Found in coffee, tea, energy drinks, cola</li></ul><strong>Signs of Dependence</strong><ul><li>Headache, fatigue, irritability when skipping (withdrawal)</li><li>Anxiety, palpitations, insomnia with excess intake</li></ul><strong>Health Effects</strong><ul><li>Moderate use (≤400mg/day) generally safe for adults</li><li>Excess: tremors, hypertension, arrhythmia</li><li>Limit to &lt;200mg/day in pregnancy</li></ul>`
+  },
+  treatmentAlcohol: {
+    icon: '🍺', title: 'Alcohol Treatment',
+    body: `<strong>1. Detoxification</strong><ul><li>Medical supervision essential — withdrawal can be life-threatening</li><li>Benzodiazepines (Diazepam) to prevent seizures</li><li>Thiamine (Vitamin B1) to prevent brain damage</li></ul><strong>2. Medications</strong><ul><li>Disulfiram — causes sickness if alcohol consumed (aversion)</li><li>Naltrexone — reduces craving</li><li>Acamprosate — reduces withdrawal discomfort</li></ul><strong>3. Therapy</strong><ul><li>CBT, Motivational Enhancement Therapy, 12-Step</li><li>Relapse Prevention Therapy</li></ul><strong>4. Support</strong><ul><li>Alcoholics Anonymous (AA), Al-Anon for families</li><li>Inpatient / outpatient rehabilitation</li></ul>`
+  },
+  treatmentOpioid: {
+    icon: '💊', title: 'Opioid Treatment',
+    body: `<strong>1. Detoxification</strong><ul><li>Medically supervised — uncomfortable but rarely fatal</li><li>Clonidine for withdrawal symptoms</li></ul><strong>2. Opioid Substitution Therapy (OST)</strong><ul><li>Buprenorphine (Suboxone) — partial agonist, safer</li><li>Methadone — full agonist, supervised dispensing</li><li>Most evidence-based approach for opioid dependence</li></ul><strong>3. Naltrexone</strong><ul><li>Blocks opioid effects completely</li><li>Oral or monthly injection (extended-release)</li></ul><strong>4. Harm Reduction</strong><ul><li>Needle exchange programs</li><li>Naloxone distribution for overdose reversal</li><li>Residential rehabilitation with vocational support</li></ul>`
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// HINDI CONTENT
+// ═══════════════════════════════════════════════════════════
+const hiContent = {
+  alcohol: {
+    icon: '🍺', title: 'शराब — जानकारी और जागरूकता',
+    body: `<strong>शराब की लत क्या है?</strong><ul><li>एक दीर्घकालिक स्थिति जिसमें शरीर और मन शराब पर निर्भर हो जाते हैं</li><li>तलब, नियंत्रण खोना, और बंद करने पर विदड्रॉल — इसकी पहचान है</li><li>इसे Alcohol Use Disorder (AUD) भी कहते हैं</li></ul><strong>संकेत और लक्षण</strong><ul><li>शराब पीने की तीव्र इच्छा (तलब)</li><li>एक बार शुरू करने के बाद रुक न पाना</li><li>सहनशीलता बढ़ना — पहले जितना असर के लिए ज़्यादा शराब चाहिए</li><li>विदड्रॉल: कंपकंपी, पसीना, चिंता, दौरे</li></ul><strong>स्वास्थ्य पर प्रभाव</strong><ul><li>लीवर: फैटी लीवर → हेपेटाइटिस → सिरोसिस</li><li>दिमाग: Wernicke-Korsakoff सिंड्रोम, याददाश्त कमज़ोर होना</li><li>दिल: कार्डियोमायोपैथी, अनियमित धड़कन</li></ul><strong>सहायता कब लें</strong><ul><li>यदि चाहते हुए भी शराब नहीं छोड़ पा रहे</li><li>यदि न पीने पर विदड्रॉल के लक्षण आते हैं</li><li>यदि काम, रिश्ते या स्वास्थ्य प्रभावित हो रहा है</li></ul>`
+  },
+  opioid: {
+    icon: '💊', title: 'ओपिओइड — जानकारी और जागरूकता',
+    body: `<strong>ओपिओइड क्या हैं?</strong><ul><li>दिमाग के ओपिओइड रिसेप्टर्स पर काम करने वाली दवाएं</li><li>उदाहरण: मॉर्फिन, हेरोइन, ट्रामाडोल, फेंटेनाइल</li><li>दर्द के लिए चिकित्सीय उपयोग होता है — दुरुपयोग से लत लगती है</li></ul><strong>ओपिओइड उपयोग विकार के लक्षण</strong><ul><li>सिकुड़ी हुई पुतलियां, उनींदापन, धीमी सांस</li><li>हाथों पर सुई के निशान (इंजेक्शन से)</li><li>विदड्रॉल: मांसपेशियों में दर्द, उल्टी, बेचैनी</li></ul><strong>ओवरडोज़ के खतरनाक लक्षण 🚨</strong><ul><li>बेहोशी, सांस बंद होना, होंठ नीले पड़ना</li><li>गड़गड़ाहट या घुटन की आवाज़</li></ul><strong>नालोक्सोन — आपातकालीन दवा</strong><ul><li>ओपिओइड ओवरडोज़ को मिनटों में उलट देती है</li><li>पहले आपातकालीन सेवाओं को कॉल करें</li></ul>`
+  },
+  cannabis: {
+    icon: '🌿', title: 'भांग/गांजा — जानकारी और जागरूकता',
+    body: `<strong>भांग/गांजा क्या है?</strong><ul><li>Cannabis sativa पौधे से बना; सक्रिय तत्व THC है</li><li>मारिजुआना, हशीश, या तेल के रूप में उपयोग</li></ul><strong>उपयोग विकार के लक्षण</strong><ul><li>लाल आंखें, भूख बढ़ना, प्रतिक्रिया धीमी होना</li><li>विदड्रॉल: चिड़चिड़ापन, नींद न आना, भूख कम होना</li><li>लंबे उपयोग से प्रेरणा खत्म होना</li></ul><strong>स्वास्थ्य पर प्रभाव</strong><ul><li>धूम्रपान से फेफड़ों को नुकसान</li><li>मनोविकृति (साइकोसिस) का खतरा बढ़ता है</li><li>किशोरों में दिमागी विकास बाधित होता है</li></ul>`
+  },
+  nicotine: {
+    icon: '🚬', title: 'निकोटीन — जानकारी और जागरूकता',
+    body: `<strong>निकोटीन क्या है?</strong><ul><li>तंबाकू और ई-सिगरेट में पाया जाने वाला अत्यंत नशीला पदार्थ</li><li>दुनिया में रोके जा सकने वाले मौतों का प्रमुख कारण</li></ul><strong>निर्भरता के लक्षण</strong><ul><li>सुबह उठते ही सिगरेट पीना</li><li>न पी सकने पर चिड़चिड़ापन, बेचैनी</li><li>नुकसान जानते हुए भी जारी रखना</li></ul><strong>स्वास्थ्य पर प्रभाव</strong><ul><li>फेफड़े: COPD, फेफड़ों का कैंसर, ब्रोंकाइटिस</li><li>दिल: हृदय रोग, स्ट्रोक, उच्च रक्तचाप</li><li>मुंह और गले का कैंसर, गर्भावस्था में जटिलताएं</li></ul>`
+  },
+  cocaine: {
+    icon: '🤍', title: 'कोकेन — जानकारी और जागरूकता',
+    body: `<strong>कोकेन क्या है?</strong><ul><li>कोका पौधे से बना शक्तिशाली उत्तेजक — सूंघा, इंजेक्ट या स्मोक (क्रैक) किया जाता है</li><li>तीव्र लेकिन अल्पकालिक उत्साह — बिंज उपयोग की ओर ले जाता है</li></ul><strong>उपयोग के लक्षण</strong><ul><li>फैली हुई पुतलियां, तेज़ दिल की धड़कन, बेचैनी</li><li>नाक से खून, नाक की हड्डी को नुकसान</li><li>उपयोग के बाद क्रैश: थकान, अवसाद, तलब</li></ul><strong>स्वास्थ्य जोखिम</strong><ul><li>युवाओं में भी दिल का दौरा, स्ट्रोक, दौरे</li><li>कोकेन-प्रेरित मनोविकृति और पागलपन</li></ul>`
+  },
+  amphetamine: {
+    icon: '⚡', title: 'एम्फेटामाइन — जानकारी और जागरूकता',
+    body: `<strong>एम्फेटामाइन क्या है?</strong><ul><li>सिंथेटिक उत्तेजक: एम्फेटामाइन, मेथएम्फेटामाइन (मेथ/क्रिस्टल)</li><li>उत्साह, ऊर्जा या वज़न घटाने के लिए दुरुपयोग</li></ul><strong>उपयोग के लक्षण</strong><ul><li>तेज़ वज़न घटना, दांतों की सड़न ("मेथ माउथ")</li><li>पागलपन, आक्रामकता, त्वचा खुजलाना</li><li>क्रैश: गंभीर अवसाद, थकान, अत्यधिक नींद</li></ul><strong>स्वास्थ्य जोखिम</strong><ul><li>उच्च रक्तचाप, अनियमित धड़कन, दिल का दौरा</li><li>सिज़ोफ्रेनिया जैसी मनोविकृति</li><li>दीर्घकालिक उपयोग से डोपामाइन प्रणाली को नुकसान</li></ul>`
+  },
+  mdma: {
+    icon: '💙', title: 'MDMA — जानकारी और जागरूकता',
+    body: `<strong>MDMA क्या है?</strong><ul><li>एक्स्टसी / मॉली — उत्तेजक और भावनात्मक पदार्थ</li><li>उत्साह, भावनात्मक खुलापन, ऊर्जा देता है</li><li>आमतौर पर पार्टियों/रेव्स में उपयोग होता है</li></ul><strong>उपयोग के लक्षण</strong><ul><li>फैली पुतलियां, जबड़ा भींचना, पसीना, तेज़ धड़कन</li><li>बाद में: अवसाद, थकान, याददाश्त कमज़ोर होना</li></ul><strong>स्वास्थ्य जोखिम</strong><ul><li>अतिताप — खतरनाक शरीर का तापमान (घातक हो सकता है)</li><li>अत्यधिक पानी पीने से सोडियम कम होना</li><li>एंटीडिप्रेसेंट के साथ सेरोटोनिन सिंड्रोम</li></ul>`
+  },
+  lsd: {
+    icon: '🌀', title: 'LSD — जानकारी और जागरूकता',
+    body: `<strong>LSD क्या है?</strong><ul><li>Lysergic acid diethylamide — एक शक्तिशाली हैलुसिनोजन</li><li>प्रभाव 8–12 घंटे तक रहते हैं; टैब या तरल के रूप में</li></ul><strong>उपयोग के लक्षण</strong><ul><li>दृश्य/श्रवण मतिभ्रम, फैली पुतलियां</li><li>समय और पहचान का विकृत अहसास</li><li>"ट्रिप" के दौरान तीव्र मनोदशा परिवर्तन</li></ul><strong>स्वास्थ्य जोखिम</strong><ul><li>बुरे ट्रिप: अत्यधिक घबराहट, पागलपन</li><li>मनोविकृति को ट्रिगर कर सकता है</li><li>HPPD — उपयोग के बाद भी फ्लैशबैक आना</li></ul>`
+  },
+  caffeine: {
+    icon: '☕', title: 'कैफीन — जानकारी और जागरूकता',
+    body: `<strong>कैफीन क्या है?</strong><ul><li>दुनिया का सबसे व्यापक रूप से उपयोग किया जाने वाला मनोसक्रिय पदार्थ</li><li>कॉफी, चाय, एनर्जी ड्रिंक, कोला में पाया जाता है</li></ul><strong>निर्भरता के लक्षण</strong><ul><li>न लेने पर सिरदर्द, थकान, चिड़चिड़ापन (विदड्रॉल)</li><li>अधिक मात्रा में: चिंता, धड़कन तेज़ होना, नींद न आना</li></ul><strong>स्वास्थ्य पर प्रभाव</strong><ul><li>सामान्य मात्रा (≤400mg/दिन) वयस्कों के लिए आमतौर पर सुरक्षित</li><li>अधिक मात्रा: कंपकंपी, उच्च रक्तचाप, अनियमित धड़कन</li><li>गर्भावस्था में &lt;200mg/दिन तक सीमित रखें</li></ul>`
+  },
+  treatmentAlcohol: {
+    icon: '🍺', title: 'शराब का उपचार',
+    body: `<strong>1. डिटॉक्सिफिकेशन (विषमुक्ति)</strong><ul><li>चिकित्सीय निगरानी आवश्यक — शराब विदड्रॉल जानलेवा हो सकता है</li><li>दौरे रोकने के लिए बेंजोडायजेपाइन (डायजेपाम)</li><li>मस्तिष्क क्षति रोकने के लिए थायमिन (विटामिन B1)</li></ul><strong>2. दवाएं</strong><ul><li>डिसल्फिरम — शराब पीने पर बीमारी करता है (विरक्ति)</li><li>नालट्रेक्सोन — तलब कम करती है</li><li>एकैम्प्रोसेट — विदड्रॉल की तकलीफ कम करती है</li></ul><strong>3. मनोचिकित्सा</strong><ul><li>CBT, प्रेरक वृद्धि चिकित्सा, 12-स्टेप</li><li>रिलैप्स प्रिवेंशन थेरेपी</li></ul><strong>4. सहायता समूह</strong><ul><li>Alcoholics Anonymous (AA), परिवारों के लिए Al-Anon</li><li>आवासीय / बाह्य रोगी पुनर्वास</li></ul>`
+  },
+  treatmentOpioid: {
+    icon: '💊', title: 'ओपिओइड उपचार',
+    body: `<strong>1. डिटॉक्सिफिकेशन</strong><ul><li>चिकित्सीय निगरानी — कष्टदायक लेकिन शायद ही जानलेवा</li><li>विदड्रॉल लक्षणों के लिए क्लोनिडीन</li></ul><strong>2. ओपिओइड सब्सटिट्यूशन थेरेपी (OST)</strong><ul><li>बुप्रेनॉर्फिन (Suboxone) — आंशिक एगोनिस्ट, सुरक्षित</li><li>मेथाडोन — पूर्ण एगोनिस्ट, निगरानी में दी जाती है</li><li>ओपिओइड निर्भरता के लिए सबसे साक्ष्य-आधारित उपचार</li></ul><strong>3. नालट्रेक्सोन</strong><ul><li>ओपिओइड के प्रभाव को पूरी तरह रोकती है</li><li>मौखिक या मासिक इंजेक्शन के रूप में उपलब्ध</li></ul><strong>4. हार्म रिडक्शन</strong><ul><li>सुई विनिमय कार्यक्रम</li><li>ओवरडोज़ रिवर्सल के लिए नालोक्सोन वितरण</li><li>व्यावसायिक सहायता के साथ पुनर्वास</li></ul>`
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// MENU DEFINITIONS
+// ═══════════════════════════════════════════════════════════
+const enMainOpts = [
+  { key:'alcohol',     icon:'🍺', label:'Alcohol',      sub:'Knowledge & Awareness' },
+  { key:'opioid',      icon:'💊', label:'Opioids',      sub:'Knowledge & Awareness' },
+  { key:'cannabis',    icon:'🌿', label:'Cannabis',     sub:'Knowledge & Awareness' },
+  { key:'nicotine',    icon:'🚬', label:'Nicotine',     sub:'Knowledge & Awareness' },
+  { key:'cocaine',     icon:'🤍', label:'Cocaine',      sub:'Knowledge & Awareness' },
+  { key:'amphetamine', icon:'⚡', label:'Amphetamines', sub:'Knowledge & Awareness' },
+  { key:'mdma',        icon:'💙', label:'MDMA',         sub:'Knowledge & Awareness' },
+  { key:'lsd',         icon:'🌀', label:'LSD',          sub:'Knowledge & Awareness' },
+  { key:'caffeine',    icon:'☕', label:'Caffeine',     sub:'Knowledge & Awareness' },
+  { key:'treatment',   icon:'🏥', label:'Treatment',    sub:'Alcohol & Opioid options' },
+];
+
+const hiMainOpts = [
+  { key:'alcohol',     icon:'🍺', label:'शराब',         sub:'जानकारी और जागरूकता' },
+  { key:'opioid',      icon:'💊', label:'ओपिओइड',       sub:'जानकारी और जागरूकता' },
+  { key:'cannabis',    icon:'🌿', label:'भांग/गांजा',   sub:'जानकारी और जागरूकता' },
+  { key:'nicotine',    icon:'🚬', label:'निकोटीन',      sub:'जानकारी और जागरूकता' },
+  { key:'cocaine',     icon:'🤍', label:'कोकेन',        sub:'जानकारी और जागरूकता' },
+  { key:'amphetamine', icon:'⚡', label:'एम्फेटामाइन',  sub:'जानकारी और जागरूकता' },
+  { key:'mdma',        icon:'💙', label:'MDMA',         sub:'जानकारी और जागरूकता' },
+  { key:'lsd',         icon:'🌀', label:'LSD',          sub:'जानकारी और जागरूकता' },
+  { key:'caffeine',    icon:'☕', label:'कैफीन',        sub:'जानकारी और जागरूकता' },
+  { key:'treatment',   icon:'🏥', label:'उपचार',        sub:'शराब और ओपिओइड विकल्प' },
+];
+
+const enTreatOpts = [
+  { key:'treatmentAlcohol', icon:'🍺', label:'Alcohol Treatment',  sub:'Detox, medications, therapy' },
+  { key:'treatmentOpioid',  icon:'💊', label:'Opioid Treatment',   sub:'OST, Naltrexone, rehab' },
+  { key:'back',             icon:'↩️', label:'Back to Main Menu',  sub:'' },
+];
+
+const hiTreatOpts = [
+  { key:'treatmentAlcohol', icon:'🍺', label:'शराब का उपचार',     sub:'डिटॉक्स, दवाएं, थेरेपी' },
+  { key:'treatmentOpioid',  icon:'💊', label:'ओपिओइड उपचार',      sub:'OST, नालट्रेक्सोन, पुनर्वास' },
+  { key:'back',             icon:'↩️', label:'मुख्य मेनू पर जाएं', sub:'' },
+];
+
+// ═══════════════════════════════════════════════════════════
+// RENDER HELPERS
+// ═══════════════════════════════════════════════════════════
+function addBotMsg(html, isHindi = false, delay = 0) {
+  return new Promise(r => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = 'msg bot';
+      div.innerHTML = `<div class="bubble${isHindi ? ' hindi' : ''}">${html}</div>`;
+      ms.appendChild(div);
+      ms.scrollTop = ms.scrollHeight;
+      r();
+    }, delay);
+  });
+}
+
+function addUserMsg(text) {
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `<div class="bubble">${text}</div>`;
+  ms.appendChild(div);
+  ms.scrollTop = ms.scrollHeight;
+}
+
+function addTyping() {
+  const div = document.createElement('div');
+  div.className = 'msg bot'; div.id = 'typing';
+  div.innerHTML = `<div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  ms.appendChild(div);
+  ms.scrollTop = ms.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing');
+  if (t) t.remove();
+}
+
+function clearOptions() {
+  const o = document.getElementById('cur-opts');
+  if (o) o.remove();
+}
+
+function addOptions(opts, isGrid = false) {
+  clearOptions();
+  const wrap = document.createElement('div');
+  wrap.className = (isGrid ? 'options grid' : 'options');
+  wrap.id = 'cur-opts';
+  const isHi = lang === 'hi';
+
+  opts.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn' + (isHi ? ' hindi-btn' : '');
+    btn.innerHTML = `<span class="opt-icon">${opt.icon}</span><span><span class="opt-label">${opt.label}</span>${opt.sub ? `<span class="opt-sub">${opt.sub}</span>` : ''}</span>`;
+    btn.onclick = () => handleOption(opt.key);
+    wrap.appendChild(btn);
+  });
+
+  ms.appendChild(wrap);
+  ms.scrollTop = ms.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════════
+// FLOW
+// ═══════════════════════════════════════════════════════════
+async function showMainMenu(isReturn = false) {
+  const isHi = lang === 'hi';
+  if (isReturn) {
+    const msg = isHi
+      ? `↩️ <strong>मुख्य मेनू</strong><br><span style="color:var(--text-muted);font-size:12px">आप क्या जानना चाहते हैं?</span>`
+      : `↩️ <strong>Back to Main Menu</strong><br><span style="color:var(--text-muted);font-size:12px">What would you like to know about?</span>`;
+    await addBotMsg(msg, isHi);
+  }
+  addOptions(isHi ? hiMainOpts : enMainOpts, true);
+}
+
+async function showContent(key) {
+  clearOptions();
+  const isHi = lang === 'hi';
+  const db = isHi ? hiContent : enContent;
+  const c = db[key];
+  if (!c) return;
+
+  addTyping();
+  await new Promise(r => setTimeout(r, 700));
+  removeTyping();
+
+  const backHint = isHi
+    ? `<p class="back-hint">वापस जाने के लिए <strong style="color:var(--accent)">MENU</strong> टाइप करें या नीचे दबाएं</p>`
+    : `<p class="back-hint">Type <strong style="color:var(--accent)">MENU</strong> or tap below to go back</p>`;
+
+  await addBotMsg(`<span class="emoji-lead">${c.icon}</span><strong>${c.title}</strong>${c.body}${backHint}`, isHi);
+
+  const backOpt = isHi
+    ? [{ key:'back', icon:'↩️', label:'मुख्य मेनू पर जाएं', sub:'' }]
+    : [{ key:'back', icon:'↩️', label:'Back to Main Menu', sub:'' }];
+  addOptions(backOpt);
+}
+
+async function handleOption(key) {
+  clearOptions();
+  const isHi = lang === 'hi';
+
+  if (key === 'back') {
+    await showMainMenu(true);
+    return;
+  }
+
+  if (key === 'treatment') {
+    const label = isHi ? '🏥 उपचार विकल्प' : '🏥 Treatment Options';
+    addUserMsg(label);
+    addTyping();
+    await new Promise(r => setTimeout(r, 600));
+    removeTyping();
+    const msg = isHi
+      ? `<span class="emoji-lead">🏥</span><strong>उपचार जानकारी</strong><br><span style="color:var(--text-muted);font-size:12px">आप किस उपचार के बारे में जानना चाहते हैं?</span>`
+      : `<span class="emoji-lead">🏥</span><strong>Treatment Information</strong><br><span style="color:var(--text-muted);font-size:12px">Which treatment would you like to know about?</span>`;
+    await addBotMsg(msg, isHi);
+    addOptions(isHi ? hiTreatOpts : enTreatOpts);
+    return;
+  }
+
+  const allOpts = [...(isHi ? hiMainOpts : enMainOpts), ...(isHi ? hiTreatOpts : enTreatOpts)];
+  const found = allOpts.find(o => o.key === key);
+  if (found) addUserMsg(`${found.icon} ${found.label}`);
+
+  await showContent(key);
+}
+
+// ═══════════════════════════════════════════════════════════
+// TEXT INPUT
+// ═══════════════════════════════════════════════════════════
+function handleUserText() {
+  const val = inputEl.value.trim();
+  if (!val) return;
+  inputEl.value = '';
+  const lower = val.toLowerCase();
+
+  if (!lang) {
+    if (lower.includes('hindi') || lower.includes('हिंदी') || lower === 'hi') {
+      selectLanguage('hi', val);
+    } else if (lower.includes('english') || lower === 'en') {
+      selectLanguage('en', val);
+    } else {
+      addUserMsg(val);
+      addBotMsg('Please select your language first. 👆<br>पहले भाषा चुनें। 👆');
+    }
+    return;
+  }
+
+  if (lower === 'menu' || lower === 'back' || lower === 'मेनू' || lower === 'वापस') {
+    addUserMsg(val);
+    clearOptions();
+    showMainMenu(true);
+    return;
+  }
+
+  const keyMap = {
+    '1':'alcohol','alcohol':'alcohol','शराब':'alcohol',
+    '2':'opioid','opioid':'opioid','opioids':'opioid','ओपिओइड':'opioid',
+    '3':'cannabis','cannabis':'cannabis','भांग':'cannabis','गांजा':'cannabis','weed':'cannabis',
+    '4':'nicotine','nicotine':'nicotine','निकोटीन':'nicotine','tobacco':'nicotine',
+    '5':'cocaine','cocaine':'cocaine','कोकेन':'cocaine','coke':'cocaine',
+    '6':'amphetamine','amphetamine':'amphetamine','एम्फेटामाइन':'amphetamine','meth':'amphetamine',
+    '7':'mdma','mdma':'mdma','ecstasy':'mdma','molly':'mdma',
+    '8':'lsd','lsd':'lsd','acid':'lsd',
+    '9':'caffeine','caffeine':'caffeine','कैफीन':'caffeine','coffee':'caffeine',
+    '10':'treatment','treatment':'treatment','उपचार':'treatment',
+  };
+
+  if (lower in keyMap) {
+    addUserMsg(val);
+    clearOptions();
+    const key = keyMap[lower];
+    if (key === 'treatment') handleOption('treatment');
+    else showContent(key);
+    return;
+  }
+
+  addUserMsg(val);
+  clearOptions();
+  const fallback = lang === 'hi'
+    ? `🤔 मुझे समझ नहीं आया। कृपया नीचे से विकल्प चुनें या <strong style="color:var(--accent)">MENU</strong> टाइप करें।`
+    : `🤔 I didn't catch that. Please choose an option below or type <strong style="color:var(--accent)">MENU</strong>.`;
+  addBotMsg(fallback, lang === 'hi');
+  showMainMenu();
+}
+
+inputEl.addEventListener('keydown', e => { if (e.key === 'Enter') handleUserText(); });
+
+// ═══════════════════════════════════════════════════════════
+// LANGUAGE SELECTION
+// ═══════════════════════════════════════════════════════════
+async function selectLanguage(selectedLang, userText) {
+  clearOptions();
+  lang = selectedLang;
+
+  if (userText) addUserMsg(userText);
+  else addUserMsg(lang === 'hi' ? '🇮🇳 हिंदी' : '🇬🇧 English');
+
+  addTyping();
+  await new Promise(r => setTimeout(r, 800));
+  removeTyping();
+
+  if (lang === 'hi') {
+    inputEl.placeholder = 'संदेश टाइप करें या ऊपर से विकल्प चुनें…';
+    document.getElementById('disclaimer').textContent = '⚕️ केवल शैक्षणिक उद्देश्य के लिए। हमेशा किसी स्वास्थ्य विशेषज्ञ से परामर्श लें।';
+    await addBotMsg(`
+      <span class="emoji-lead">🙏</span>
+      <strong>स्वागत है! धन्यवाद कि आपने हमसे संपर्क किया।</strong><br><br>
+      हम आपकी मदद के लिए तैयार हैं।<br>
+      <span style="color:var(--text-muted);font-size:12px">कृपया चुनें कि आप क्या जानना चाहते हैं:</span>
+    `, true);
+  } else {
+    inputEl.placeholder = 'Type or choose an option above…';
+    document.getElementById('disclaimer').textContent = '⚕️ For educational purposes only. Always consult a healthcare professional.';
+    await addBotMsg(`
+      <span class="emoji-lead">🙏</span>
+      <strong>Welcome! Thank you for reaching out.</strong><br><br>
+      We are here and ready to help you.<br>
+      <span style="color:var(--text-muted);font-size:12px">Please choose what you'd like to know about:</span>
+    `);
+  }
+
+  addOptions(lang === 'hi' ? hiMainOpts : enMainOpts, true);
+}
+
+function resetToLanguage() {
+  lang = null;
+  clearOptions();
+  ms.innerHTML = '';
+  init();
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT — Language selector screen
+// ═══════════════════════════════════════════════════════════
+async function init() {
+  await new Promise(r => setTimeout(r, 400));
+  addTyping();
+  await new Promise(r => setTimeout(r, 900));
+  removeTyping();
+
+  await addBotMsg(`
+    <span class="emoji-lead">👋</span>
+    <strong>Welcome | स्वागत है</strong><br><br>
+    Please select your language.<br>
+    <span style="font-family:'Noto Sans Devanagari',sans-serif;">कृपया अपनी भाषा चुनें।</span>
+  `);
+
+  // Language selector buttons
+  const wrap = document.createElement('div');
+  wrap.className = 'lang-select';
+  wrap.id = 'cur-opts';
+
+  const enBtn = document.createElement('button');
+  enBtn.className = 'lang-btn en';
+  enBtn.innerHTML = `<span class="lang-flag">🇬🇧</span><span class="lang-name">English</span><span class="lang-sub">Continue in English</span>`;
+  enBtn.onclick = () => selectLanguage('en');
+
+  const hiBtn = document.createElement('button');
+  hiBtn.className = 'lang-btn hi';
+  hiBtn.innerHTML = `<span class="lang-flag">🇮🇳</span><span class="lang-name" style="font-family:'Noto Sans Devanagari',sans-serif;">हिंदी</span><span class="lang-sub" style="font-family:'Noto Sans Devanagari',sans-serif;">हिंदी में जारी रखें</span>`;
+  hiBtn.onclick = () => selectLanguage('hi');
+
+  wrap.appendChild(enBtn);
+  wrap.appendChild(hiBtn);
+  ms.appendChild(wrap);
+  ms.scrollTop = ms.scrollHeight;
+}
+
+init();
+</script>
+</body>
+</html>
