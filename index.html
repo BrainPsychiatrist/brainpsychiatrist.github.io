@@ -299,6 +299,31 @@
   .opt-label { font-weight: 500; display: block; }
   .opt-sub { font-size: 11px; color: var(--text-muted); display: block; margin-top: 1px; }
 
+  /* RESOURCE LINKS (Drive / Reel) */
+  .link-btn {
+    background: var(--surface2);
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    text-align: left;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.3;
+    text-decoration: none;
+  }
+  .link-btn:hover {
+    background: rgba(52,211,153,0.08);
+    box-shadow: 0 4px 12px rgba(52,211,153,0.12);
+    transform: translateY(-1px);
+  }
+  .link-btn.hindi-btn { font-family: 'Noto Sans Devanagari', sans-serif; font-size: 12px; }
+
   /* INPUT */
   .input-bar {
     border-top: 1px solid var(--border);
@@ -375,7 +400,7 @@
     <div class="avatar">🧠</div>
     <div class="header-info">
       <h1>Substance Awareness <span>| पदार्थ जागरूकता</span></h1>
-      <p>Online — Ready to Help</p>
+      <p>Online — Ready to Help &nbsp;·&nbsp; <span id="visitorCount">👁️ …</span></p>
     </div>
     <div class="lang-badge" onclick="resetToLanguage()" title="Change Language">🌐 Lang</div>
   </div>
@@ -388,7 +413,7 @@
       <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
     </button>
   </div>
-  <div class="disclaimer" id="disclaimer">⚕️ For educational purposes only. Always consult a healthcare professional. | केवल शैक्षणिक उद्देश्य के लिए।</div>
+  <div class="disclaimer" id="disclaimer">⚕️ For educational purposes only. Always consult a healthcare professional. | केवल शैक्षणिक उद्देश्य के लिए। | PDFs Only For Educational Purpose</div>
 </div>
 
 <script>
@@ -397,44 +422,73 @@ const inputEl = document.getElementById('userInput');
 let lang = null; // 'en' or 'hi'
 
 // ═══════════════════════════════════════════════════════════
+// VISITOR COUNTER (free, no-signup counting API)
+// Counts once per page load. Uses a unique key so it doesn't
+// collide with anyone else's counter on the same free service.
+// ═══════════════════════════════════════════════════════════
+(function trackVisitor() {
+  const el = document.getElementById('visitorCount');
+  fetch('https://countapi.mileshilliard.com/api/v1/hit/brainpsychiatrist_github_io_substance_bot')
+    .then(r => r.json())
+    .then(data => {
+      const n = Number(data.value).toLocaleString('en-IN');
+      el.textContent = `👁️ ${n} visits`;
+    })
+    .catch(() => {
+      el.style.display = 'none'; // fail silently if the counter service is down
+    });
+})();
+
+// ═══════════════════════════════════════════════════════════
 // ENGLISH CONTENT
 // ═══════════════════════════════════════════════════════════
 const enContent = {
   alcohol: {
     icon: '🍺', title: 'Alcohol — Knowledge & Awareness',
-    body: `<strong>What is Alcohol Dependence?</strong><ul><li>A chronic condition where body & mind become reliant on alcohol</li><li>Characterized by craving, loss of control, and withdrawal on stopping</li><li>Also called Alcohol Use Disorder (AUD)</li></ul><strong>Signs & Symptoms</strong><ul><li>Strong urge to drink (craving)</li><li>Unable to stop once started</li><li>Tolerance — needing more alcohol for same effect</li><li>Withdrawal: tremors, sweating, anxiety, seizures</li></ul><strong>Health Effects</strong><ul><li>Liver: Fatty liver → Hepatitis → Cirrhosis</li><li>Brain: Wernicke-Korsakoff syndrome, cognitive decline</li><li>Heart: Cardiomyopathy, arrhythmias</li></ul><strong>When to Seek Help</strong><ul><li>If you cannot stop despite wanting to</li><li>If withdrawal symptoms appear when not drinking</li></ul>`
+    body: `<strong>What is Alcohol Dependence?</strong><ul><li>A chronic condition where body & mind become reliant on alcohol</li><li>Characterized by craving, loss of control, and withdrawal on stopping</li><li>Also called Alcohol Use Disorder (AUD)</li></ul><strong>Signs & Symptoms</strong><ul><li>Strong urge to drink (craving)</li><li>Unable to stop once started</li><li>Tolerance — needing more alcohol for same effect</li><li>Withdrawal: tremors, sweating, anxiety, seizures</li></ul><strong>Health Effects</strong><ul><li>Liver: Fatty liver → Hepatitis → Cirrhosis</li><li>Brain: Wernicke-Korsakoff syndrome, cognitive decline</li><li>Heart: Cardiomyopathy, arrhythmias</li></ul><strong>When to Seek Help</strong><ul><li>If you cannot stop despite wanting to</li><li>If withdrawal symptoms appear when not drinking</li></ul>`,
+    links: [
+      { icon: '📄', label: 'Alcohol Guide', sub: 'PDF — Google Drive', url: 'https://drive.google.com/file/d/1Vv-iZaX0r09_9Q2mGG8qmE8mtBfkTI7c/view?usp=drive_link' },
+      { icon: '📄', label: 'Dependence', sub: 'PDF — Google Drive', url: 'https://drive.google.com/file/d/1qHf6m9ERxHKku8_KUJmAIRtHr0g88nfV/view?usp=drive_link' }
+    ]
   },
   opioid: {
     icon: '💊', title: 'Opioids — Knowledge & Awareness',
-    body: `<strong>What are Opioids?</strong><ul><li>Drugs acting on opioid receptors — natural, semi-synthetic, synthetic</li><li>Examples: Morphine, Heroin, Tramadol, Fentanyl</li></ul><strong>Signs of Opioid Use Disorder</strong><ul><li>Pinpoint pupils, drowsiness, slowed breathing</li><li>Track marks on arms (if injecting)</li><li>Withdrawal: muscle aches, goosebumps, vomiting, anxiety</li></ul><strong>Overdose Warning Signs 🚨</strong><ul><li>Unconscious, slow/stopped breathing, blue lips</li><li>Gurgling or choking sounds</li></ul><strong>Naloxone</strong><ul><li>Reverses opioid overdose within minutes</li><li>Always call emergency services first</li></ul>`
+    body: `<strong>What are Opioids?</strong><ul><li>Drugs acting on opioid receptors — natural, semi-synthetic, synthetic</li><li>Examples: Morphine, Heroin, Tramadol, Fentanyl</li></ul><strong>Signs of Opioid Use Disorder</strong><ul><li>Pinpoint pupils, drowsiness, slowed breathing</li><li>Track marks on arms (if injecting)</li><li>Withdrawal: muscle aches, goosebumps, vomiting, anxiety</li></ul><strong>Overdose Warning Signs 🚨</strong><ul><li>Unconscious, slow/stopped breathing, blue lips</li><li>Gurgling or choking sounds</li></ul><strong>Naloxone</strong><ul><li>Reverses opioid overdose within minutes</li><li>Always call emergency services first</li></ul>`,
+    links: [
+      { icon: '📄', label: 'Opioid Guide', sub: 'PDF — Google Drive', url: 'https://drive.google.com/file/d/1zgD3jnZZ3dskEi1zBzyShIersHo86a6G/view?usp=drive_link' },
+      { icon: '🖼️', label: 'Treatment Image', sub: 'Google Drive', url: 'https://drive.google.com/file/d/1Jb1yvGf-xqL5ewRSqoJtJ8uRhgRF4SRR/view?usp=drive_link' }
+    ]
   },
   cannabis: {
     icon: '🌿', title: 'Cannabis — Knowledge & Awareness',
-    body: `<strong>What is Cannabis?</strong><ul><li>Derived from Cannabis sativa plant; active compound is THC</li><li>Used as marijuana, hashish, or oils</li></ul><strong>Signs of Cannabis Use Disorder</strong><ul><li>Red eyes, increased appetite, slowed reaction time</li><li>Withdrawal: irritability, insomnia, decreased appetite</li><li>Amotivational syndrome with heavy use</li></ul><strong>Health Effects</strong><ul><li>Lung damage with chronic smoking</li><li>Can trigger psychosis, especially in adolescents</li><li>Impaired brain development in young users</li></ul>`
+    body: `<strong>What is Cannabis?</strong><ul><li>Derived from Cannabis sativa plant; active compound is THC</li><li>Used as marijuana, hashish, or oils</li></ul><strong>Signs of Cannabis Use Disorder</strong><ul><li>Red eyes, increased appetite, slowed reaction time</li><li>Withdrawal: irritability, insomnia, decreased appetite</li><li>Amotivational syndrome with heavy use</li></ul><strong>Health Effects</strong><ul><li>Lung damage with chronic smoking</li><li>Can trigger psychosis, especially in adolescents</li><li>Impaired brain development in young users</li></ul>`,
+    links: [
+      { icon: '📄', label: 'Cannabis Guide', sub: 'PDF — Google Drive', url: 'https://drive.google.com/file/d/1F-XpfKRd352n54lPxWCf-Xk0F8L9WxYC/view?usp=drive_link' }
+    ]
   },
   nicotine: {
     icon: '🚬', title: 'Nicotine — Knowledge & Awareness',
-    body: `<strong>What is Nicotine?</strong><ul><li>Highly addictive stimulant in tobacco and e-cigarettes</li><li>One of the leading preventable causes of death globally</li></ul><strong>Signs of Dependence</strong><ul><li>Smoking first thing in the morning</li><li>Irritability, anxiety when unable to smoke</li><li>Continuing despite knowing health harms</li></ul><strong>Health Effects</strong><ul><li>Lungs: COPD, lung cancer, chronic bronchitis</li><li>Heart: Coronary artery disease, stroke</li><li>Oral cancers, pregnancy complications</li></ul>`
+    body: `<strong>Coming soon</strong>`
   },
   cocaine: {
     icon: '🤍', title: 'Cocaine — Knowledge & Awareness',
-    body: `<strong>What is Cocaine?</strong><ul><li>Powerful stimulant from coca plant — snorted, injected, or smoked (crack)</li><li>Causes intense but short-lived euphoria — leads to binge use</li></ul><strong>Signs of Use</strong><ul><li>Dilated pupils, elevated heart rate, restlessness</li><li>Nosebleeds, septum damage (snorting)</li><li>Crash after use: fatigue, depression, craving</li></ul><strong>Health Risks</strong><ul><li>Heart attack (even in young people), stroke, seizures</li><li>Cocaine-induced psychosis, paranoia</li></ul>`
+    body: `<strong>Coming soon</strong>`
   },
   amphetamine: {
     icon: '⚡', title: 'Amphetamines — Knowledge & Awareness',
-    body: `<strong>What are Amphetamines?</strong><ul><li>Synthetic stimulants: Amphetamine, Methamphetamine (Meth/Crystal)</li><li>Misused for euphoria, energy, or weight loss</li></ul><strong>Signs of Use</strong><ul><li>Rapid weight loss, dental decay ("meth mouth")</li><li>Paranoia, aggression, skin picking</li><li>Crash: severe depression, fatigue, hypersomnia</li></ul><strong>Health Risks</strong><ul><li>Hypertension, arrhythmia, heart attack</li><li>Psychosis resembling schizophrenia</li><li>Dopamine system damage with chronic use</li></ul>`
+    body: `<strong>Coming soon</strong>`
   },
   mdma: {
     icon: '💙', title: 'MDMA — Knowledge & Awareness',
-    body: `<strong>What is MDMA?</strong><ul><li>Ecstasy / Molly — stimulant and empathogen</li><li>Causes euphoria, emotional closeness, energy</li><li>Commonly used at parties/raves</li></ul><strong>Signs of Use</strong><ul><li>Dilated pupils, jaw clenching, sweating, elevated heart rate</li><li>Comedown: depression, fatigue, memory impairment</li></ul><strong>Health Risks</strong><ul><li>Hyperthermia — dangerous overheating (can be fatal)</li><li>Hyponatremia from excess water intake</li><li>Serotonin syndrome if mixed with antidepressants</li></ul>`
+    body: `<strong>Coming soon</strong>`
   },
   lsd: {
     icon: '🌀', title: 'LSD — Knowledge & Awareness',
-    body: `<strong>What is LSD?</strong><ul><li>Lysergic acid diethylamide — powerful hallucinogen</li><li>Effects last 8–12 hours; taken as tabs or liquid</li></ul><strong>Signs of Use</strong><ul><li>Visual/auditory hallucinations, dilated pupils</li><li>Distorted sense of time and identity</li><li>Extreme mood swings during a "trip"</li></ul><strong>Health Risks</strong><ul><li>Bad trips: extreme panic, paranoia</li><li>Can trigger psychotic disorders</li><li>HPPD — flashbacks that persist after use</li></ul>`
+    body: `<strong>Coming soon</strong>`
   },
   caffeine: {
     icon: '☕', title: 'Caffeine — Knowledge & Awareness',
-    body: `<strong>What is Caffeine?</strong><ul><li>World's most widely used psychoactive substance</li><li>Found in coffee, tea, energy drinks, cola</li></ul><strong>Signs of Dependence</strong><ul><li>Headache, fatigue, irritability when skipping (withdrawal)</li><li>Anxiety, palpitations, insomnia with excess intake</li></ul><strong>Health Effects</strong><ul><li>Moderate use (≤400mg/day) generally safe for adults</li><li>Excess: tremors, hypertension, arrhythmia</li><li>Limit to &lt;200mg/day in pregnancy</li></ul>`
+    body: `<strong>Coming soon</strong>`
   },
   treatmentAlcohol: {
     icon: '🍺', title: 'Alcohol Treatment',
@@ -452,39 +506,48 @@ const enContent = {
 const hiContent = {
   alcohol: {
     icon: '🍺', title: 'शराब — जानकारी और जागरूकता',
-    body: `<strong>शराब की लत क्या है?</strong><ul><li>एक दीर्घकालिक स्थिति जिसमें शरीर और मन शराब पर निर्भर हो जाते हैं</li><li>तलब, नियंत्रण खोना, और बंद करने पर विदड्रॉल — इसकी पहचान है</li><li>इसे Alcohol Use Disorder (AUD) भी कहते हैं</li></ul><strong>संकेत और लक्षण</strong><ul><li>शराब पीने की तीव्र इच्छा (तलब)</li><li>एक बार शुरू करने के बाद रुक न पाना</li><li>सहनशीलता बढ़ना — पहले जितना असर के लिए ज़्यादा शराब चाहिए</li><li>विदड्रॉल: कंपकंपी, पसीना, चिंता, दौरे</li></ul><strong>स्वास्थ्य पर प्रभाव</strong><ul><li>लीवर: फैटी लीवर → हेपेटाइटिस → सिरोसिस</li><li>दिमाग: Wernicke-Korsakoff सिंड्रोम, याददाश्त कमज़ोर होना</li><li>दिल: कार्डियोमायोपैथी, अनियमित धड़कन</li></ul><strong>सहायता कब लें</strong><ul><li>यदि चाहते हुए भी शराब नहीं छोड़ पा रहे</li><li>यदि न पीने पर विदड्रॉल के लक्षण आते हैं</li><li>यदि काम, रिश्ते या स्वास्थ्य प्रभावित हो रहा है</li></ul>`
+    body: `<strong>शराब की लत क्या है?</strong><ul><li>एक दीर्घकालिक स्थिति जिसमें शरीर और मन शराब पर निर्भर हो जाते हैं</li><li>तलब, नियंत्रण खोना, और बंद करने पर विदड्रॉल — इसकी पहचान है</li><li>इसे Alcohol Use Disorder (AUD) भी कहते हैं</li></ul><strong>संकेत और लक्षण</strong><ul><li>शराब पीने की तीव्र इच्छा (तलब)</li><li>एक बार शुरू करने के बाद रुक न पाना</li><li>सहनशीलता बढ़ना — पहले जितना असर के लिए ज़्यादा शराब चाहिए</li><li>विदड्रॉल: कंपकंपी, पसीना, चिंता, दौरे</li></ul><strong>स्वास्थ्य पर प्रभाव</strong><ul><li>लीवर: फैटी लीवर → हेपेटाइटिस → सिरोसिस</li><li>दिमाग: Wernicke-Korsakoff सिंड्रोम, याददाश्त कमज़ोर होना</li><li>दिल: कार्डियोमायोपैथी, अनियमित धड़कन</li></ul><strong>सहायता कब लें</strong><ul><li>यदि चाहते हुए भी शराब नहीं छोड़ पा रहे</li><li>यदि न पीने पर विदड्रॉल के लक्षण आते हैं</li><li>यदि काम, रिश्ते या स्वास्थ्य प्रभावित हो रहा है</li></ul>`,
+    links: [
+      { icon: '📄', label: 'शराब गाइड', sub: 'PDF — Google Drive', url: 'https://drive.google.com/file/d/1Env7jf5Xcb3wrnPZe1uKnGHZmx6fGuSH/view?usp=drive_link' }
+    ]
   },
   opioid: {
     icon: '💊', title: 'ओपिओइड — जानकारी और जागरूकता',
-    body: `<strong>ओपिओइड क्या हैं?</strong><ul><li>दिमाग के ओपिओइड रिसेप्टर्स पर काम करने वाली दवाएं</li><li>उदाहरण: मॉर्फिन, हेरोइन, ट्रामाडोल, फेंटेनाइल</li><li>दर्द के लिए चिकित्सीय उपयोग होता है — दुरुपयोग से लत लगती है</li></ul><strong>ओपिओइड उपयोग विकार के लक्षण</strong><ul><li>सिकुड़ी हुई पुतलियां, उनींदापन, धीमी सांस</li><li>हाथों पर सुई के निशान (इंजेक्शन से)</li><li>विदड्रॉल: मांसपेशियों में दर्द, उल्टी, बेचैनी</li></ul><strong>ओवरडोज़ के खतरनाक लक्षण 🚨</strong><ul><li>बेहोशी, सांस बंद होना, होंठ नीले पड़ना</li><li>गड़गड़ाहट या घुटन की आवाज़</li></ul><strong>नालोक्सोन — आपातकालीन दवा</strong><ul><li>ओपिओइड ओवरडोज़ को मिनटों में उलट देती है</li><li>पहले आपातकालीन सेवाओं को कॉल करें</li></ul>`
+    body: `<strong>ओपिओइड क्या हैं?</strong><ul><li>दिमाग के ओपिओइड रिसेप्टर्स पर काम करने वाली दवाएं</li><li>उदाहरण: मॉर्फिन, हेरोइन, ट्रामाडोल, फेंटेनाइल</li><li>दर्द के लिए चिकित्सीय उपयोग होता है — दुरुपयोग से लत लगती है</li></ul><strong>ओपिओइड उपयोग विकार के लक्षण</strong><ul><li>सिकुड़ी हुई पुतलियां, उनींदापन, धीमी सांस</li><li>हाथों पर सुई के निशान (इंजेक्शन से)</li><li>विदड्रॉल: मांसपेशियों में दर्द, उल्टी, बेचैनी</li></ul><strong>ओवरडोज़ के खतरनाक लक्षण 🚨</strong><ul><li>बेहोशी, सांस बंद होना, होंठ नीले पड़ना</li><li>गड़गड़ाहट या घुटन की आवाज़</li></ul><strong>नालोक्सोन — आपातकालीन दवा</strong><ul><li>ओपिओइड ओवरडोज़ को मिनटों में उलट देती है</li><li>पहले आपातकालीन सेवाओं को कॉल करें</li></ul>`,
+    links: [
+      { icon: '📄', label: 'अफीम गाइड', sub: 'PDF — Google Drive', url: 'https://drive.google.com/file/d/1QvhDtRaKZbvxvSRzD9QIfuAAEhRD8tRW/view?usp=drive_link' }
+    ]
   },
   cannabis: {
     icon: '🌿', title: 'भांग/गांजा — जानकारी और जागरूकता',
-    body: `<strong>भांग/गांजा क्या है?</strong><ul><li>Cannabis sativa पौधे से बना; सक्रिय तत्व THC है</li><li>मारिजुआना, हशीश, या तेल के रूप में उपयोग</li></ul><strong>उपयोग विकार के लक्षण</strong><ul><li>लाल आंखें, भूख बढ़ना, प्रतिक्रिया धीमी होना</li><li>विदड्रॉल: चिड़चिड़ापन, नींद न आना, भूख कम होना</li><li>लंबे उपयोग से प्रेरणा खत्म होना</li></ul><strong>स्वास्थ्य पर प्रभाव</strong><ul><li>धूम्रपान से फेफड़ों को नुकसान</li><li>मनोविकृति (साइकोसिस) का खतरा बढ़ता है</li><li>किशोरों में दिमागी विकास बाधित होता है</li></ul>`
+    body: `<strong>भांग/गांजा क्या है?</strong><ul><li>Cannabis sativa पौधे से बना; सक्रिय तत्व THC है</li><li>मारिजुआना, हशीश, या तेल के रूप में उपयोग</li></ul><strong>उपयोग विकार के लक्षण</strong><ul><li>लाल आंखें, भूख बढ़ना, प्रतिक्रिया धीमी होना</li><li>विदड्रॉल: चिड़चिड़ापन, नींद न आना, भूख कम होना</li><li>लंबे उपयोग से प्रेरणा खत्म होना</li></ul><strong>स्वास्थ्य पर प्रभाव</strong><ul><li>धूम्रपान से फेफड़ों को नुकसान</li><li>मनोविकृति (साइकोसिस) का खतरा बढ़ता है</li><li>किशोरों में दिमागी विकास बाधित होता है</li></ul>`,
+    links: [
+      { icon: '📄', label: 'भांग', sub: 'PDF — Google Drive', url: 'https://drive.google.com/file/d/15ZF9nxxpPoyIeT3_66blqEnBaA_NOolZ/view?usp=drive_link' }
+    ]
   },
   nicotine: {
     icon: '🚬', title: 'निकोटीन — जानकारी और जागरूकता',
-    body: `<strong>निकोटीन क्या है?</strong><ul><li>तंबाकू और ई-सिगरेट में पाया जाने वाला अत्यंत नशीला पदार्थ</li><li>दुनिया में रोके जा सकने वाले मौतों का प्रमुख कारण</li></ul><strong>निर्भरता के लक्षण</strong><ul><li>सुबह उठते ही सिगरेट पीना</li><li>न पी सकने पर चिड़चिड़ापन, बेचैनी</li><li>नुकसान जानते हुए भी जारी रखना</li></ul><strong>स्वास्थ्य पर प्रभाव</strong><ul><li>फेफड़े: COPD, फेफड़ों का कैंसर, ब्रोंकाइटिस</li><li>दिल: हृदय रोग, स्ट्रोक, उच्च रक्तचाप</li><li>मुंह और गले का कैंसर, गर्भावस्था में जटिलताएं</li></ul>`
+    body: `<strong>जल्द आ रहा है</strong>`
   },
   cocaine: {
     icon: '🤍', title: 'कोकेन — जानकारी और जागरूकता',
-    body: `<strong>कोकेन क्या है?</strong><ul><li>कोका पौधे से बना शक्तिशाली उत्तेजक — सूंघा, इंजेक्ट या स्मोक (क्रैक) किया जाता है</li><li>तीव्र लेकिन अल्पकालिक उत्साह — बिंज उपयोग की ओर ले जाता है</li></ul><strong>उपयोग के लक्षण</strong><ul><li>फैली हुई पुतलियां, तेज़ दिल की धड़कन, बेचैनी</li><li>नाक से खून, नाक की हड्डी को नुकसान</li><li>उपयोग के बाद क्रैश: थकान, अवसाद, तलब</li></ul><strong>स्वास्थ्य जोखिम</strong><ul><li>युवाओं में भी दिल का दौरा, स्ट्रोक, दौरे</li><li>कोकेन-प्रेरित मनोविकृति और पागलपन</li></ul>`
+    body: `<strong>जल्द आ रहा है</strong>`
   },
   amphetamine: {
     icon: '⚡', title: 'एम्फेटामाइन — जानकारी और जागरूकता',
-    body: `<strong>एम्फेटामाइन क्या है?</strong><ul><li>सिंथेटिक उत्तेजक: एम्फेटामाइन, मेथएम्फेटामाइन (मेथ/क्रिस्टल)</li><li>उत्साह, ऊर्जा या वज़न घटाने के लिए दुरुपयोग</li></ul><strong>उपयोग के लक्षण</strong><ul><li>तेज़ वज़न घटना, दांतों की सड़न ("मेथ माउथ")</li><li>पागलपन, आक्रामकता, त्वचा खुजलाना</li><li>क्रैश: गंभीर अवसाद, थकान, अत्यधिक नींद</li></ul><strong>स्वास्थ्य जोखिम</strong><ul><li>उच्च रक्तचाप, अनियमित धड़कन, दिल का दौरा</li><li>सिज़ोफ्रेनिया जैसी मनोविकृति</li><li>दीर्घकालिक उपयोग से डोपामाइन प्रणाली को नुकसान</li></ul>`
+    body: `<strong>जल्द आ रहा है</strong>`
   },
   mdma: {
     icon: '💙', title: 'MDMA — जानकारी और जागरूकता',
-    body: `<strong>MDMA क्या है?</strong><ul><li>एक्स्टसी / मॉली — उत्तेजक और भावनात्मक पदार्थ</li><li>उत्साह, भावनात्मक खुलापन, ऊर्जा देता है</li><li>आमतौर पर पार्टियों/रेव्स में उपयोग होता है</li></ul><strong>उपयोग के लक्षण</strong><ul><li>फैली पुतलियां, जबड़ा भींचना, पसीना, तेज़ धड़कन</li><li>बाद में: अवसाद, थकान, याददाश्त कमज़ोर होना</li></ul><strong>स्वास्थ्य जोखिम</strong><ul><li>अतिताप — खतरनाक शरीर का तापमान (घातक हो सकता है)</li><li>अत्यधिक पानी पीने से सोडियम कम होना</li><li>एंटीडिप्रेसेंट के साथ सेरोटोनिन सिंड्रोम</li></ul>`
+    body: `<strong>जल्द आ रहा है</strong>`
   },
   lsd: {
     icon: '🌀', title: 'LSD — जानकारी और जागरूकता',
-    body: `<strong>LSD क्या है?</strong><ul><li>Lysergic acid diethylamide — एक शक्तिशाली हैलुसिनोजन</li><li>प्रभाव 8–12 घंटे तक रहते हैं; टैब या तरल के रूप में</li></ul><strong>उपयोग के लक्षण</strong><ul><li>दृश्य/श्रवण मतिभ्रम, फैली पुतलियां</li><li>समय और पहचान का विकृत अहसास</li><li>"ट्रिप" के दौरान तीव्र मनोदशा परिवर्तन</li></ul><strong>स्वास्थ्य जोखिम</strong><ul><li>बुरे ट्रिप: अत्यधिक घबराहट, पागलपन</li><li>मनोविकृति को ट्रिगर कर सकता है</li><li>HPPD — उपयोग के बाद भी फ्लैशबैक आना</li></ul>`
+    body: `<strong>जल्द आ रहा है</strong>`
   },
   caffeine: {
     icon: '☕', title: 'कैफीन — जानकारी और जागरूकता',
-    body: `<strong>कैफीन क्या है?</strong><ul><li>दुनिया का सबसे व्यापक रूप से उपयोग किया जाने वाला मनोसक्रिय पदार्थ</li><li>कॉफी, चाय, एनर्जी ड्रिंक, कोला में पाया जाता है</li></ul><strong>निर्भरता के लक्षण</strong><ul><li>न लेने पर सिरदर्द, थकान, चिड़चिड़ापन (विदड्रॉल)</li><li>अधिक मात्रा में: चिंता, धड़कन तेज़ होना, नींद न आना</li></ul><strong>स्वास्थ्य पर प्रभाव</strong><ul><li>सामान्य मात्रा (≤400mg/दिन) वयस्कों के लिए आमतौर पर सुरक्षित</li><li>अधिक मात्रा: कंपकंपी, उच्च रक्तचाप, अनियमित धड़कन</li><li>गर्भावस्था में &lt;200mg/दिन तक सीमित रखें</li></ul>`
+    body: `<strong>जल्द आ रहा है</strong>`
   },
   treatmentAlcohol: {
     icon: '🍺', title: 'शराब का उपचार',
@@ -629,10 +692,30 @@ async function showContent(key) {
 
   await addBotMsg(`<span class="emoji-lead">${c.icon}</span><strong>${c.title}</strong>${c.body}${backHint}`, isHi);
 
+  if (c.links && c.links.length) {
+    addLinkButtons(c.links, isHi);
+  }
+
   const backOpt = isHi
     ? [{ key:'back', icon:'↩️', label:'मुख्य मेनू पर जाएं', sub:'' }]
     : [{ key:'back', icon:'↩️', label:'Back to Main Menu', sub:'' }];
   addOptions(backOpt);
+}
+
+function addLinkButtons(links, isHi) {
+  const wrap = document.createElement('div');
+  wrap.className = 'options';
+  links.forEach(l => {
+    const a = document.createElement('a');
+    a.className = 'link-btn' + (isHi ? ' hindi-btn' : '');
+    a.href = l.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.innerHTML = `<span class="opt-icon">${l.icon}</span><span><span class="opt-label">${l.label}</span>${l.sub ? `<span class="opt-sub">${l.sub}</span>` : ''}</span>`;
+    wrap.appendChild(a);
+  });
+  ms.appendChild(wrap);
+  ms.scrollTop = ms.scrollHeight;
 }
 
 async function handleOption(key) {
@@ -742,7 +825,7 @@ async function selectLanguage(selectedLang, userText) {
 
   if (lang === 'hi') {
     inputEl.placeholder = 'संदेश टाइप करें या ऊपर से विकल्प चुनें…';
-    document.getElementById('disclaimer').textContent = '⚕️ केवल शैक्षणिक उद्देश्य के लिए। हमेशा किसी स्वास्थ्य विशेषज्ञ से परामर्श लें।';
+    document.getElementById('disclaimer').textContent = '⚕️ केवल शैक्षणिक उद्देश्य के लिए। हमेशा किसी स्वास्थ्य विशेषज्ञ से परामर्श लें। | PDFs Only For Educational Purpose';
     await addBotMsg(`
       <span class="emoji-lead">🙏</span>
       <strong>स्वागत है! धन्यवाद कि आपने हमसे संपर्क किया।</strong><br><br>
@@ -751,7 +834,7 @@ async function selectLanguage(selectedLang, userText) {
     `, true);
   } else {
     inputEl.placeholder = 'Type or choose an option above…';
-    document.getElementById('disclaimer').textContent = '⚕️ For educational purposes only. Always consult a healthcare professional.';
+    document.getElementById('disclaimer').textContent = '⚕️ For educational purposes only. Always consult a healthcare professional. | PDFs Only For Educational Purpose';
     await addBotMsg(`
       <span class="emoji-lead">🙏</span>
       <strong>Welcome! Thank you for reaching out.</strong><br><br>
